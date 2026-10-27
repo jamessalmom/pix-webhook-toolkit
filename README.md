@@ -1,26 +1,19 @@
 # pix-webhook-toolkit
 
-Small, dependency-light toolkit for building resilient webhook receivers and
-outbound notifiers for instant-payment-style integrations (PIX/SPI-like
-flows). Extracted and generalized from patterns used in production fintech
-integrations: signature verification, idempotency, and exponential backoff.
+A small toolkit for receiving and sending webhooks in instant-payment integrations (PIX/SPI-style flows): signature verification, idempotency keys and retries with exponential backoff. These are the pieces I kept rewriting when working on payment integrations.
 
-> Educational/portfolio project: it implements generic patterns, not any
-> bank's proprietary specification.
+> This is a portfolio project. It implements generic patterns, not any bank's or PSP's specification.
 
-## Features
+## What is included
 
-- **HMAC signature verification** for inbound webhooks (`signature.py`)
-- **Exponential backoff with jitter** for outbound calls (`retry.py`)
-- **Resilient HTTP client** with automatic idempotency keys (`client.py`)
-- **Flask blueprint** ready to mount as a webhook receiver (`webhook.py`)
+- `signature.py`: HMAC verification for incoming webhooks.
+- `retry.py`: exponential backoff with jitter for outgoing calls.
+- `client.py`: an HTTP client that adds an idempotency key to every request and retries safely.
+- `webhook.py`: a Flask blueprint ready to mount as the webhook receiver.
 
-## Why this exists
+## Why
 
-Payment webhooks arrive out of order, sometimes duplicated, and partner APIs
-occasionally time out under load. This toolkit packages the small set of
-primitives I kept re-implementing on transaction/integration work: verify
-first, retry safely, never double-process.
+Payment webhooks arrive out of order and sometimes twice, and partner APIs time out under load. The rule the toolkit follows is: verify the signature first, retry only what is safe to retry, and never process the same event twice.
 
 ## Quick start
 
@@ -38,7 +31,7 @@ app.register_blueprint(
 )
 ```
 
-Calling a partner API with retries + idempotency:
+Calling a partner API with retries and an idempotency key:
 
 ```python
 from pix_webhook_toolkit import ResilientClient
@@ -58,4 +51,4 @@ ruff check .
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
